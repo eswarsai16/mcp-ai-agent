@@ -1,0 +1,12 @@
+# Python
+school-ai-agent/venv/
+school-ai-agent/__pycache__/
+*.pyc
+.env
+
+# Node
+school-api/node_modules/
+school-api/dist/
+
+# General
+.DS_Store

@@ -1,0 +1,687 @@
+openapi: 3.0.0
+info:
+  title: School API
+  version: 1.0.0
+  description: REST API for School_DB (students, classes, teachers, subjects, marks)
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Students
+  - name: Classes
+  - name: Teachers
+  - name: Subjects
+  - name: Marks
+
+paths:
+  /api/students:
+    get:
+      tags: [Students]
+      summary: Get all students
+      operationId: getStudents
+      responses:
+        '200':
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+    post:
+      tags: [Students]
+      summary: Create a student
+      operationId: createStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+            examples:
+              sample:
+                value:
+                  student_id: s25
+                  name: "Alice"
+                  class_id: c7
+      responses:
+        '201':
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+
+  /api/students/{id}:
+    get:
+      tags: [Students]
+      summary: Get student by ID
+      operationId: getStudentById
+      parameters:
+        - $ref: '#/components/parameters/StudentIdPath'
+      responses:
+        '200':
+          description: Student found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          description: Not found
+    put:
+      tags: [Students]
+      summary: Update a student
+      operationId: updateStudent
+      parameters:
+        - $ref: '#/components/parameters/StudentIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+      responses:
+        '200':
+          description: Student updated
+        '404':
+          description: Not found
+    delete:
+      tags: [Students]
+      summary: Delete a student
+      operationId: deleteStudent
+      parameters:
+        - $ref: '#/components/parameters/StudentIdPath'
+      responses:
+        '204':
+          description: Student deleted
+        '404':
+          description: Not found
+
+  /api/classes:
+    get:
+      tags: [Classes]
+      summary: Get all classes
+      operationId: getClasses
+      responses:
+        '200':
+          description: List of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Class'
+    post:
+      tags: [Classes]
+      summary: Create a class
+      operationId: createClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Class'
+            examples:
+              sample:
+                value:
+                  class_id: c7
+                  class_name: "Grade 7"
+      responses:
+        '201':
+          description: Class created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+
+  /api/classes/{id}:
+    get:
+      tags: [Classes]
+      summary: Get class by ID
+      operationId: getClassById
+      parameters:
+        - $ref: '#/components/parameters/ClassIdPath'
+      responses:
+        '200':
+          description: Class found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Class'
+        '404':
+          description: Not found
+    put:
+      tags: [Classes]
+      summary: Update a class
+      operationId: updateClass
+      parameters:
+        - $ref: '#/components/parameters/ClassIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Class'
+      responses:
+        '200':
+          description: Class updated
+        '404':
+          description: Not found
+    delete:
+      tags: [Classes]
+      summary: Delete a class
+      operationId: deleteClass
+      parameters:
+        - $ref: '#/components/parameters/ClassIdPath'
+      responses:
+        '204':
+          description: Class deleted
+        '404':
+          description: Not found
+
+  /api/teachers:
+    get:
+      tags: [Teachers]
+      summary: Get all teachers
+      operationId: getTeachers
+      responses:
+        '200':
+          description: List of teachers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Teacher'
+    post:
+      tags: [Teachers]
+      summary: Create a teacher
+      operationId: createTeacher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+            examples:
+              sample:
+                value:
+                  teacher_id: t8
+                  name: "Mr. Kumar"
+                  class_id: c7
+      responses:
+        '201':
+          description: Teacher created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+
+  /api/teachers/{id}:
+    get:
+      tags: [Teachers]
+      summary: Get teacher by ID
+      operationId: getTeacherById
+      parameters:
+        - $ref: '#/components/parameters/TeacherIdPath'
+      responses:
+        '200':
+          description: Teacher found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '404':
+          description: Not found
+    put:
+      tags: [Teachers]
+      summary: Update a teacher
+      operationId: updateTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+      responses:
+        '200':
+          description: Teacher updated
+        '404':
+          description: Not found
+    delete:
+      tags: [Teachers]
+      summary: Delete a teacher
+      operationId: deleteTeacher
+      parameters:
+        - $ref: '#/components/parameters/TeacherIdPath'
+      responses:
+        '204':
+          description: Teacher deleted
+        '404':
+          description: Not found
+
+  /api/subjects:
+    get:
+      tags: [Subjects]
+      summary: Get all subjects
+      operationId: getSubjects
+      responses:
+        '200':
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
+    post:
+      tags: [Subjects]
+      summary: Create a subject
+      operationId: createSubject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subject'
+            examples:
+              sample:
+                value:
+                  subject_id: eng5
+                  subject_name: "English"
+                  teacher_id: t8
+      responses:
+        '201':
+          description: Subject created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+
+  /api/subjects/{id}:
+    get:
+      tags: [Subjects]
+      summary: Get subject by ID
+      operationId: getSubjectById
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPath'
+      responses:
+        '200':
+          description: Subject found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+        '404':
+          description: Not found
+    put:
+      tags: [Subjects]
+      summary: Update a subject
+      operationId: updateSubject
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subject'
+      responses:
+        '200':
+          description: Subject updated
+        '404':
+          description: Not found
+    delete:
+      tags: [Subjects]
+      summary: Delete a subject
+      operationId: deleteSubject
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPath'
+      responses:
+        '204':
+          description: Subject deleted
+        '404':
+          description: Not found
+
+  /api/subjects/{id}/students:
+    get:
+      tags: [Subjects]
+      summary: Get students enrolled in a subject
+      operationId: getStudentsBySubject
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPath'
+      responses:
+        '200':
+          description: List of students for the subject
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+
+  /api/marks:
+    get:
+      tags: [Marks]
+      summary: Get marks (all, or for a student-subject pair)
+      description: >
+        Provide both student_id and subject_id to get the single mark entry;
+        if either is missing, the endpoint returns the full marks list.
+      operationId: getByStudentAndSubject
+      parameters:
+        - in: query
+          name: student_id
+          schema:
+            type: string
+            pattern: '^s[0-9]+$'
+          description: Student ID (e.g. s12)
+          required: false
+        - in: query
+          name: subject_id
+          schema:
+            type: string
+            pattern: '^(eng|mat|sci)[0-9]+$'
+          description: Subject ID (e.g. eng5)
+          required: false
+      responses:
+        '200':
+          description: List of marks, or marks for a student-subject pair
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Marks'
+                  - type: object
+                    properties:
+                      student_id:
+                        type: string
+                        pattern: '^s[0-9]+$'
+                      subject_id:
+                        type: string
+                        pattern: '^(eng|mat|sci)[0-9]+$'
+                      marks:
+                        type: number
+              examples:
+                singleMark:
+                  summary: Single mark (when both query params are provided)
+                  value:
+                    student_id: s25
+                    subject_id: eng5
+                    marks: 78
+                listResponse:
+                  summary: Full list (when one or both params are missing)
+                  value:
+                    - marks_id: m101
+                      student_id: s25
+                      subject_id: eng5
+                      marks: 78
+                    - marks_id: m102
+                      student_id: s26
+                      subject_id: mat3
+                      marks: 92
+        '400':
+          description: Bad request (missing or invalid parameters)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Not found (no marks for given student_id and subject_id)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+    post:
+      tags: [Marks]
+      summary: Add marks
+      operationId: createMarks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Marks'
+            examples:
+              sample:
+                value:
+                  marks_id: m101
+                  student_id: s25
+                  subject_id: eng5
+                  marks: 78
+      responses:
+        '201':
+          description: Marks created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Marks'
+
+  /api/marks/{id}:
+    get:
+      tags: [Marks]
+      summary: Get marks by ID
+      operationId: getMarksById
+      parameters:
+        - $ref: '#/components/parameters/MarksIdPath'
+      responses:
+        '200':
+          description: Marks record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Marks'
+        '404':
+          description: Not found
+    put:
+      tags: [Marks]
+      summary: Update marks by ID
+      operationId: updateMarks
+      parameters:
+        - $ref: '#/components/parameters/MarksIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Marks'
+      responses:
+        '200':
+          description: Marks updated
+        '404':
+          description: Not found
+    delete:
+      tags: [Marks]
+      summary: Delete marks by ID
+      operationId: deleteMarks
+      parameters:
+        - $ref: '#/components/parameters/MarksIdPath'
+      responses:
+        '204':
+          description: Marks deleted
+        '404':
+          description: Not found
+
+  /api/marks/by-student/{studentId}:
+    get:
+      tags: [Marks]
+      summary: Get marks by studentId
+      operationId: getMarksByStudent
+      parameters:
+        - $ref: '#/components/parameters/StudentIdPathByParam'
+      responses:
+        '200':
+          description: Marks for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Marks'
+
+  /api/marks/by-subject/{subjectId}:
+    get:
+      tags: [Marks]
+      summary: Get marks by subjectId
+      operationId: getMarksBySubject
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPathByParam'
+      responses:
+        '200':
+          description: Marks for the subject
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Marks'
+
+  /api/marks/by-subject/{subjectId}/average:
+    get:
+      tags: [Marks]
+      summary: Get average marks for a subject
+      operationId: getAverageMarksForSubject
+      parameters:
+        - $ref: '#/components/parameters/SubjectIdPathByParam'
+      responses:
+        '200':
+          description: Average marks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subject_id:
+                    type: string
+                    pattern: '^(eng|mat|sci)[0-9]+$'
+                  average:
+                    type: number
+                required: [subject_id, average]
+
+components:
+  parameters:
+    StudentIdPath:
+      in: path
+      name: id
+      description: student_id like s25
+      required: true
+      schema:
+        type: string
+        pattern: '^s[0-9]+$'
+    ClassIdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        pattern: '^c[0-9]+$'
+    TeacherIdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        pattern: '^t[0-9]+$'
+    SubjectIdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        pattern: '^(eng|mat|sci)[0-9]+$'
+    MarksIdPath:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        pattern: '^m[0-9]+$'
+    StudentIdPathByParam:
+      in: path
+      name: studentId
+      required: true
+      schema:
+        type: string
+        pattern: '^s[0-9]+$'
+    SubjectIdPathByParam:
+      in: path
+      name: subjectId
+      required: true
+      schema:
+        type: string
+        pattern: '^(eng|mat|sci)[0-9]+$'
+
+  schemas:
+    Student:
+      type: object
+      properties:
+        student_id:
+          type: string
+          pattern: '^s[0-9]+$'
+        name:
+          type: string
+        class_id:
+          type: string
+          pattern: '^c[0-9]+$'
+      required: [student_id, name, class_id]
+
+    Class:
+      type: object
+      properties:
+        class_id:
+          type: string
+          pattern: '^c[0-9]+$'
+        class_name:
+          type: string
+      required: [class_id, class_name]
+
+    Teacher:
+      type: object
+      properties:
+        teacher_id:
+          type: string
+          pattern: '^t[0-9]+$'
+        name:
+          type: string
+        class_id:
+          type: string
+          pattern: '^c[0-9]+$'
+      required: [teacher_id, name, class_id]
+
+    Subject:
+      type: object
+      properties:
+        subject_id:
+          type: string
+          pattern: '^(eng|mat|sci)[0-9]+$'
+        subject_name:
+          type: string
+        teacher_id:
+          type: string
+          pattern: '^t[0-9]+$'
+      required: [subject_id, subject_name, teacher_id]
+
+    Marks:
+      type: object
+      properties:
+        marks_id:
+          type: string
+          pattern: '^m[0-9]+$'
+        student_id:
+          type: string
+          pattern: '^s[0-9]+$'
+        subject_id:
+          type: string
+          pattern: '^(eng|mat|sci)[0-9]+$'
+        marks:
+          type: number
+      required: [marks_id, student_id, subject_id, marks]

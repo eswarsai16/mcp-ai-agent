@@ -1,0 +1,436 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Agentic",
+    "version": "1.0"
+  },
+  "paths": {
+    "/{tenant}/{appversion}/{cluster}/{locale}/{channel}/{propertyName}/TRAY/SEARCH": {
+      "get": {
+        "tags": [
+          "TraySearch"
+        ],
+        "operationId": "SEARCH",
+        "parameters": [
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "description": "Service Platform (client Name) \n\nThiss value is not used by AGL but can be used by the caching layer in front of AGL, e.g. Varnish, to route API requests to different AGL instances depending on the specific use case, e.g. canary testing, platform migration etc. By default the value 'AGL' can be used",
+            "schema": {
+              "type": "string",
+              "default": "AGL"
+            }
+          },
+          {
+            "name": "appversion",
+            "in": "path",
+            "required": true,
+            "description": "A version of API call. \n\nThis value depends on the version of AGL used in the environment depending on the release. Please refer to the B2C Front-End APIs page for the correct appVersion value. \n Note that older versions of the API exist in later versions of the AGL also, so for example on AVS 6.6 it is possible to use the API version 1.5, 1.4, 1.3, and 1.2 depending on the API availability in the corresponding release. Please refer to the release notes for the specific AGL version to understand if prior versions of the specific API are still available in that release, deprecated, or removed.",
+            "schema": {
+              "type": "string",
+              "default": "1.6"
+            }
+          },
+          {
+            "name": "cluster",
+            "in": "path",
+            "description":"User cluster \n\n This value depends on the cluster AGL configuration. This configuration can be overridden by UI Builder. Some Nano Services specialize their response based on the locale.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "A"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "path",
+            "description":"Locale value of the user",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "ENG"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "path",
+            "description": "This represents the device platform. \n\nThis value is used by some Nano Services and it is passed through to the back-end services that require it.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "CHROME_HTML5"
+            }
+          },
+          {
+            "name": "propertyName",
+            "in": "path",
+            "description": "Property that can take any value and it's used to filter out content that does not belong to the Property",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "AVS_BASE"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description":"Starting value of pagination",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description":"Ending value of pagination",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "maxResults",
+            "in": "query",
+            "description":"Maximum number of results to be retrieved",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Free text search applied to the content title, episodeTitle, titleBrief, actors, anchors, director, and authors.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter_contentType",
+            "in": "query",
+            "description": "Return the contents with the specified contentType \n\nIt can be a list of contentType separated by a comma.Allowed values VOD, CHANNEL,PROGRAM ",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchOrder",
+            "in": "query",
+            "description": "specify the searching order which includes both orderBy and sortOrder by ‘:’ separated \n\nAllowed values are for: \nVOD: title:asc, title:desc, starRating:asc, starRating:desc, year:asc, year:desc \nCHANNEL: title:asc, title:desc, broadcasterName:asc, broadcasterName:desc \nPROGRAM: title:asc, title:desc, starRating:asc,starRating:desc, year:asc, year:desc",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "restful",
+            "in": "header",
+            "description": "In order to retrieve correct HTTP status code from AGL API responses",
+            "schema": {
+              "type": "string",
+              "default": "yes"
+            }
+          },
+          {
+            "name": "Avs-Refresh-Token",
+            "in": "header",
+            "description": "When cookie ( avs_cookie ) expires in order to refresh the expired cookie( avs_cookie ) pass the Avs-Refresh-Token in request headers. It will set new avs_cookie. Applicable when OAUTH2_ENABLED is true",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Xsrf-Token",
+            "in": "header",
+            "description": "xsrf-Token identifier. \n\nApplicable when platform is included in CSFR_TOKEN_CHECK_PLATFORMS and CSFR_TOKEN_CHECK_ENABLED is enabled ",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraySearchResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraySearchResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraySearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Asset": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assetName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetType": {
+            "type": "string",
+            "nullable": true
+          },
+          "videoType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Container": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionItem"
+            },
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Container"
+            },
+            "nullable": true
+          },
+          "retrieveItems": {
+            "$ref": "#/components/schemas/RetrieveItems"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CopyProtection": {
+        "type": "object",
+        "properties": {
+          "securityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "securityOption": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Metadata": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentSubtype": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "longDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "isNotAvailableOutOfHome": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isCopyProtected": {
+            "type": "boolean"
+          },
+          "copyProtections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CopyProtection"
+            },
+            "nullable": true
+          },
+          "contentOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "popularity": {
+            "$ref": "#/components/schemas/Popularity"
+          },
+          "score": {
+            "type": "string",
+            "nullable": true
+          },
+          "trackingId": {
+            "type": "string",
+            "nullable": true
+          },
+          "contractStartDate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "contractEndDate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "pictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "availableAlso": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Popularity": {
+        "type": "object",
+        "properties": {
+          "kpi": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "boost": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResultObject": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "containers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Container"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrieveItems": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TraySearchResponse": {
+        "type": "object",
+        "properties": {
+          "resultCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "resultObj": {
+            "$ref": "#/components/schemas/ResultObject"
+          },
+          "systemTime": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
