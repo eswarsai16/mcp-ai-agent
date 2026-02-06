@@ -7,6 +7,9 @@ school-ai-agent/__pycache__/
 # Node
 school-api/node_modules/
 school-api/dist/
+dynamic-mcp-server/node_modules/
+dynamic-mcp-server/dist/
+
 
 # General
 .DS_Store
