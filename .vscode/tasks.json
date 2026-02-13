@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run School API",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/school-api" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+
+    {
+      "label": "Run MCP Server (wait for School API health)",
+      "type": "shell",
+      "command": "npx wait-on http-get://localhost:3000/health && npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/dynamic-mcp-server",
+        "shell": {
+          "executable": "cmd.exe",
+          "args": ["/d", "/c"]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+
+    {
+      "label": "Start Both Servers",
+      "dependsOn": [
+        "Run School API",
+        "Run MCP Server (wait for School API health)"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+
+    {
+      "label": "Run Python Graph Test",
+      "type": "shell",
+      "command": "python -m graph.run",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    }
+  ]
+}
