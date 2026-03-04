@@ -1,6 +1,6 @@
 from langchain_ollama import ChatOllama
-from graph.mcp_client import list_tools, call_tool
-from graph.state import AgentState
+from graph.core.mcp_client import list_tools, call_tool
+from graph.core.state import AgentState
 import json
 import re
 

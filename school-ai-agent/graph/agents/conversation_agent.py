@@ -1,5 +1,5 @@
 from langchain_ollama import ChatOllama
-from graph.state import AgentState
+from graph.core.state import AgentState
 
 llm = ChatOllama(model="qwen2.5:3b", temperature=0)
 
