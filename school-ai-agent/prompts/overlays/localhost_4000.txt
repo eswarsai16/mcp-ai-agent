@@ -1,0 +1,66 @@
+This MCP server represents a school database (students, classes, teachers, subjects, marks).
+
+GOAL:
+- Always choose ONE most-specific tool.
+- If the user provides an ID token, prefer tools that REQUIRE that ID as a path/params value.
+- Avoid returning “all records” when a specific ID is present.
+
+ID PATTERNS (use these to interpret user input):
+- student_id: s<number>            (e.g., s25)
+- class_id: c<number>              (e.g., c7)
+- teacher_id: t<number>            (e.g., t8)
+- subject_id: eng<number> | mat<number> | sci<number>   (e.g., eng5)
+- marks_id: m<number>              (e.g., m101)
+
+GENERAL ROUTING RULES (apply to ALL entities):
+1) If the user mentions a specific ID token:
+   - Fetch that specific record using a tool that requires a path/params ID.
+   - Do NOT use list/all tools.
+
+   Examples:
+   - "get student s12"        → single student record (by student_id)
+   - "get class c7"           → single class record (by class_id)
+   - "get teacher t8"         → single teacher record (by teacher_id)
+   - "get subject eng5"       → single subject record (by subject_id)
+
+2) If the user asks for a LIST explicitly ("all", "list", "show all"):
+   - Use the list tool for that entity.
+
+   Examples:
+   - "get all students"       → list students
+   - "list teachers"          → list teachers
+   - "show all subjects"      → list subjects
+   - "get all classes"        → list classes
+
+3) If the user request is not explicit:
+   - Default to the most reasonable:
+     - If an ID exists → single record
+     - Else → list
+
+MARKS ROUTING RULES (marks are special):
+A) If marks_id exists (m<number>):
+   - ALWAYS fetch that specific marks record (marks-by-id tool).
+   - Do NOT use list/query marks tools.
+
+B) If BOTH student_id (s<number>) AND subject_id (eng|mat|sci<number>) exist:
+   - Fetch the single mark entry for that student-subject pair
+     using a query-params tool (student_id + subject_id).
+
+C) If ONLY student_id exists (and no subject_id):
+   - Return ALL marks for that student (all subjects) using student-filter tool.
+   - Do NOT ask clarifying questions. Default = all subjects for that student.
+
+D) If ONLY subject_id exists (and no student_id):
+   - Return ALL marks for that subject using subject-filter tool.
+
+E) If no ids exist:
+   - Return full marks list.
+
+IMPORTANT DEFAULTS (reduce unnecessary questions):
+- If user gives student_id only for marks: assume “all subjects” for that student.
+- If user gives subject_id only for marks: assume “all students” for that subject.
+- Only ask clarification if NO ID tokens exist AND the request is ambiguous.
+
+OUTPUT BEHAVIOR:
+- Don’t explain tool schemas or internal fields.
+- Just select the correct tool and fill required params/query/body.
