@@ -1,4 +1,4 @@
-from typing import TypedDict, Optional, List, Dict, Any
+from typing import TypedDict, Optional, List, Dict
 
 
 class AgentState(TypedDict):
@@ -7,4 +7,3 @@ class AgentState(TypedDict):
     result: Optional[dict]
     response: Optional[str]
     history: List[Dict[str, str]]
-    last_list_result: Optional[List[Dict[str, Any]]]

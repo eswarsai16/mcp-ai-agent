@@ -78,7 +78,6 @@ def _tool_catalog(tools: list[dict]) -> list[dict]:
         # For body, include required fields if it is object-like
         required_body = []
         body_schema = props.get("body") or {}
-        body_props = body_schema.get("properties") or {}
         # if OpenAPI->Zod produced required list here
         required_body = list(body_schema.get("required") or [])
         # if not available, keep empty; do NOT explode prompt size

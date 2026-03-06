@@ -68,15 +68,6 @@ def run_mutation_agent(
     agent_label: str,
     allowed_prefixes: tuple[str, ...],
 ) -> AgentState:
-    # Global guardrail for invalid class references to avoid pointless tool loops.
-    class_token = extract_class_token_from_user(state["user_input"])
-    if class_token and not is_valid_class_token(class_token):
-        state["response"] = (
-            f"Invalid class reference: '{class_token}'. "
-            "Use class number like 'class 5' or class_id like 'c5'."
-        )
-        return state
-
     tools = list_tools()
 
     if not tools:

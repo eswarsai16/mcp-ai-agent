@@ -15,7 +15,6 @@ state = {
     "result": None,
     "response": None,
     "history": [],
-    "last_list_result": None,
 }
 
 
