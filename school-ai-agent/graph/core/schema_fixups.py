@@ -5,7 +5,12 @@ from typing import Any
 
 
 def extract_class_id_from_user(user_text: str) -> str | None:
-    match = re.search(r"\bclass\s+(c?\d+)\b", user_text, re.IGNORECASE)
+    # Accepts:
+    # - "class 7"
+    # - "class c7"
+    # - "class to 7"
+    # - "class to c7"
+    match = re.search(r"\bclass\s+(?:to\s+)?(c?\d+)\b", user_text, re.IGNORECASE)
     if not match:
         return None
     raw = match.group(1).lower()
@@ -13,10 +18,19 @@ def extract_class_id_from_user(user_text: str) -> str | None:
 
 
 def extract_class_token_from_user(user_text: str) -> str | None:
+    # Keep this broad for validation, but skip filler tokens that can
+    # appear in natural phrases like "class with class_id c7".
     match = re.search(r"\bclass\s+([a-zA-Z0-9_]+)\b", user_text, re.IGNORECASE)
     if not match:
         return None
-    return match.group(1).strip()
+    token = match.group(1).strip()
+    filler_tokens = {"to", "with", "in", "for", "the", "a", "an", "id", "name"}
+    if token.lower() in filler_tokens:
+        next_match = re.search(r"\bclass\s+to\s+([a-zA-Z0-9_]+)\b", user_text, re.IGNORECASE)
+        if next_match and next_match.group(1).strip().lower() not in filler_tokens:
+            return next_match.group(1).strip()
+        return None
+    return token
 
 
 def is_valid_class_token(token: str) -> bool:
@@ -155,6 +169,69 @@ def _extract_field_updates_from_user(user_text: str, body_props: dict) -> dict:
             updates["class_id"] = class_id
 
     return updates
+
+
+def _extract_required_field_from_user(user_text: str, field: str, field_schema: dict) -> Any | None:
+    lower = user_text.lower()
+    field_type = field_schema.get("type")
+
+    if field == "student_id":
+        m = re.search(r"\bs\d+\b", lower)
+        if m:
+            return m.group(0)
+    if field == "teacher_id":
+        m = re.search(r"\bt\d+\b", lower)
+        if m:
+            return m.group(0)
+    if field == "class_id":
+        class_id = extract_class_id_from_user(user_text)
+        if class_id:
+            return class_id
+        m = re.search(r"\bc\d+\b", lower)
+        if m:
+            return m.group(0)
+    if field == "subject_id":
+        m = re.search(r"\b(?:eng|mat|sci)\d+\b", lower)
+        if m:
+            return m.group(0)
+    if field == "marks_id":
+        m = re.search(r"\bm\d+\b", lower)
+        if m:
+            return m.group(0)
+
+    # Handle natural format like "subject eng1" for subject_id.
+    if field.endswith("_id"):
+        explicit = re.search(rf"\b{re.escape(field)}\b\s+([a-zA-Z0-9_.-]+)", user_text, re.IGNORECASE)
+        if explicit:
+            return explicit.group(1)
+        entity = field.replace("_id", "")
+        m = re.search(rf"\b{re.escape(entity)}\b\s+([a-zA-Z0-9_.-]+)", user_text, re.IGNORECASE)
+        if m:
+            return m.group(1)
+
+    if field_type == "number":
+        explicit_number = re.search(rf"\b{re.escape(field)}\b\s+(-?\d+(?:\.\d+)?)", user_text, re.IGNORECASE)
+        if explicit_number:
+            return _coerce_typed_value(explicit_number.group(1), field_schema)
+
+        if field == "marks":
+            m_marks = re.search(r"\bmarks\b[^\d-]*(-?\d+(?:\.\d+)?)", user_text, re.IGNORECASE)
+            if m_marks:
+                return _coerce_typed_value(m_marks.group(1), field_schema)
+
+        m = re.search(rf"\b{re.escape(field)}\b\s+(-?\d+(?:\.\d+)?)", user_text, re.IGNORECASE)
+        if m:
+            return _coerce_typed_value(m.group(1), field_schema)
+
+    # Generic string field extraction, e.g. "class_name class 91".
+    if field_type == "string":
+        m = re.search(rf"\b{re.escape(field)}\b\s+(.+?)(?:,|$)", user_text, re.IGNORECASE)
+        if m:
+            value = m.group(1).strip().strip("\"'").rstrip(".")
+            if value:
+                return value
+
+    return None
 
 
 def _extract_prefix_from_pattern(pattern: str | None, user_text: str, body: dict, id_field: str) -> str | None:
@@ -364,6 +441,15 @@ def apply_schema_fixes(
                         merged.update(body)
                         body.clear()
                         body.update(merged)
+
+    required_fields = body_schema.get("required") or []
+    for field in required_fields:
+        if body.get(field) is not None:
+            continue
+        schema = body_props.get(field) or {}
+        inferred = _extract_required_field_from_user(user_text, field, schema)
+        if inferred is not None:
+            body[field] = inferred
 
     if lowered_tool.startswith("delete") or lowered_tool.startswith("remove"):
         params_id_pattern = (params_props.get("id") or {}).get("pattern")

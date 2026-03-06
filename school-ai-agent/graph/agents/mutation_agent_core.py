@@ -3,10 +3,8 @@ from graph.core.state import AgentState
 from langchain_ollama import ChatOllama
 from graph.core.decision_parsing import (
     build_tool_schema_summary,
-    build_write_confirmation,
     call_signature,
     extract_arguments,
-    extract_error_message,
     extract_final_text,
     extract_tool_name,
     find_first_key,
@@ -70,6 +68,15 @@ def run_mutation_agent(
     agent_label: str,
     allowed_prefixes: tuple[str, ...],
 ) -> AgentState:
+    # Global guardrail for invalid class references to avoid pointless tool loops.
+    class_token = extract_class_token_from_user(state["user_input"])
+    if class_token and not is_valid_class_token(class_token):
+        state["response"] = (
+            f"Invalid class reference: '{class_token}'. "
+            "Use class number like 'class 5' or class_id like 'c5'."
+        )
+        return state
+
     tools = list_tools()
 
     if not tools:
@@ -195,11 +202,13 @@ User request:
 
             scratchpad.append(f"Tool: {tool}\nResult: {result}")
 
-            if is_write_tool(tool) and not looks_like_error(result):
-                state["response"] = build_write_confirmation(tool, result)
-                return state
-            if is_write_tool(tool) and looks_like_error(result):
-                state["response"] = extract_error_message(result)
+            if is_write_tool(tool):
+                state["result"] = {
+                    "tool": tool,
+                    "arguments": clean_args,
+                    "tool_result": result,
+                    "operation_done": not looks_like_error(result),
+                }
                 return state
 
             continue

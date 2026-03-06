@@ -1,71 +1,39 @@
+from __future__ import annotations
+
+import json
+import re
+
 from langchain_ollama import ChatOllama
 from graph.core.state import AgentState
 
-llm = ChatOllama(model="qwen2.5:3b", temperature=0)
-
-READ_ENTITY_KEYWORDS = {
-    "student",
-    "students",
-    "teacher",
-    "teachers",
-    "class",
-    "classes",
-    "subject",
-    "subjects",
-    "mark",
-    "marks",
-    "school",
-    "database",
-}
-
-WRITE_KEYWORDS = {
-    "add",
-    "create",
-    "insert",
-    "new",
-    "update",
-    "edit",
-    "change",
-    "modify",
-    "delete",
-    "remove",
-    "drop",
-}
-
-CREATE_KEYWORDS = {"add", "create", "insert", "new"}
-UPDATE_KEYWORDS = {"update", "edit", "change", "modify", "rename", "set"}
-DELETE_KEYWORDS = {"delete", "remove", "drop"}
+llm = ChatOllama(model="qwen2.5:3b", temperature=0, format="json", timeout=30)
 
 
-def _contains_any(text: str, words: set[str]) -> bool:
-    return any(w in text for w in words)
-
-
-def _deterministic_intent(user_text: str) -> str | None:
-    capability_phrases = [
-        "can you help",
-        "what can you",
-        "are you able",
-        "can you modify",
-        "can you update",
-    ]
-    if any(p in user_text for p in capability_phrases):
-        return "conversation"
-
-    has_entity = _contains_any(user_text, READ_ENTITY_KEYWORDS)
-    if not has_entity:
+def _safe_json_load(raw: str) -> dict | None:
+    raw = (raw or "").strip()
+    if not raw:
         return None
 
-    if _contains_any(user_text, DELETE_KEYWORDS):
-        return "deletedetails"
-    if _contains_any(user_text, UPDATE_KEYWORDS):
-        return "updatedetails"
-    if _contains_any(user_text, CREATE_KEYWORDS):
-        return "postdetails"
-    if _contains_any(user_text, WRITE_KEYWORDS):
-        return "updatedetails"
-    return "getdetails"
+    if raw.startswith("```"):
+        raw = raw.strip("`").strip()
+        raw = raw.replace("json", "", 1).strip()
 
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        pass
+
+    match = re.search(r"\{[\s\S]*\}", raw)
+    if match:
+        try:
+            parsed = json.loads(match.group(0))
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            return None
+    return None
 
 def _normalize_intent(intent: str) -> str:
     normalized = (intent or "").strip().lower()
@@ -81,51 +49,48 @@ def _normalize_intent(intent: str) -> str:
 
 
 def orchestrator(state: AgentState) -> AgentState:
-    user_text = state["user_input"].lower()
-
-    fast_intent = _deterministic_intent(user_text)
-    if fast_intent:
-        state["intent"] = fast_intent
-        return state
-
     history_text = "\n".join(
         [f"{m['role']}: {m['content']}" for m in state["history"][-6:]]
     )
 
     prompt = f"""
-    You are routing requests for a School Database AI system.
+You route requests for a School Database AI system.
 
-    If the user is asking about:
-    - students
-    - teachers
-    - classes
-    - subjects
-    - marks
-    - school database data
+Return STRICT JSON only:
+{{
+  "intent": "getDetails|postDetails|updateDetails|deleteDetails|conversation"
+}}
 
-    Then classify as one of:
-    - getDetails (read-only queries)
-    - postDetails (create/add operations)
-    - updateDetails (edit/change operations)
-    - deleteDetails (delete/remove operations)
+Rules:
+- If user asks to read/fetch/list/show/find database records, use getDetails.
+- If user asks to create/add/insert new records, use postDetails.
+- If user asks to update/edit/change records, use updateDetails.
+- If user asks to delete/remove/drop records, use deleteDetails.
+- Use conversation only for greetings or purely general chat not related to school database operations.
+- Treat mentions of student/teacher/class/subject/marks or ids like s12,t3,c5,eng2,mat4,sci1,m10 as school database intent.
 
-    If the user is just chatting or asking general knowledge, classify as:
-    - conversation
+Conversation history:
+{history_text}
 
-    Conversation history:
-    {history_text}
+User:
+{state["user_input"]}
+""".strip()
 
-    User:
-    {state["user_input"]}
+    raw = llm.invoke(prompt).content
+    parsed = _safe_json_load(raw)
 
-    Return ONLY one word:
-    getDetails
-    postDetails
-    updateDetails
-    deleteDetails
-    conversation
-    """
+    if not parsed:
+        repair_prompt = f"""
+Convert this to strict JSON: {{"intent":"getDetails|postDetails|updateDetails|deleteDetails|conversation"}}
+Content:
+{raw}
+""".strip()
+        repaired = llm.invoke(repair_prompt).content
+        parsed = _safe_json_load(repaired)
 
-    intent = llm.invoke(prompt).content.strip()
+    intent = ""
+    if isinstance(parsed, dict):
+        intent = str(parsed.get("intent", "")).strip()
+
     state["intent"] = _normalize_intent(intent)
     return state
