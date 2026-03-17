@@ -163,10 +163,10 @@ INSTRUCTIONS:
 {{"tool": "TOOL_NAME", "args": {{"params": {{}}, "query": {{}}, "body": {{}}}}}}
 
 EXAMPLES:
-- Request "get all students" → {{"tool": "getStudents", "args": {{"params": {{}}, "query": {{}}, "body": {{}}}}}}
-- Request "get student with id s101" → {{"tool": "getStudentById", "args": {{"params": {{"id": "s101"}}, "query": {{}}, "body": {{}}}}}}
-- Request "create a new class with id c77 and name class77" → {{"tool": "createClass", "args": {{"params": {{}}, "query": {{}}, "body": {{"class_id": "c77", "class_name": "class77"}}}}}}
-- Request "delete student with id s456" → {{"tool": "deleteStudent", "args": {{"params": {{"id": "s456"}}, "query": {{}}, "body": {{}}}}}}
+- Request "get all items" → {{"tool": "listItems", "args": {{"params": {{}}, "query": {{}}, "body": {{}}}}}}
+- Request "get item with id x101" → {{"tool": "getItemById", "args": {{"params": {{"id": "x101"}}, "query": {{}}, "body": {{}}}}}}
+- Request "create a new thing with id x77 and name thing77" → {{"tool": "createThing", "args": {{"params": {{}}, "query": {{}}, "body": {{"id": "x77", "name": "thing77"}}}}}}
+- Request "delete record with id rec456" → {{"tool": "deleteRecord", "args": {{"params": {{"id": "rec456"}}, "query": {{}}, "body": {{}}}}}}
 
 Your response must be VALID JSON with NO other text."""
 
