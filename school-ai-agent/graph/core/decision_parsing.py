@@ -99,6 +99,18 @@ def parse_decision(raw: str) -> dict | None:
     return None
 
 
+class DecisionParser:
+    """Parse LLM decisions/responses with JSON extraction."""
+    
+    def extract_json(self, raw: str) -> dict | None:
+        """Extract JSON dictionary from raw LLM response."""
+        return _extract_json_dict(raw)
+    
+    def parse_decision(self, raw: str) -> dict | None:
+        """Parse LLM decision output."""
+        return parse_decision(raw)
+
+
 def _normalize_entity_token(text: str) -> str:
     token = re.sub(r"[^a-z]", "", (text or "").lower())
     if token.endswith("s") and len(token) > 3:

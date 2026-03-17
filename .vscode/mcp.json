@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "dynamic-mcp-server": {
+      "type": "http",
+      "url": "http://localhost:4000/mcp",
+      "experimentalCapabilities": {
+        "streaming": true
+      }
+    }
+  }
+}
