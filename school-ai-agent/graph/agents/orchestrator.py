@@ -11,8 +11,6 @@ from ..core.state import AgentState
 class GenericOrchestrator:
     """
     Routes user requests to the appropriate handler.
-    
-    Copilot-like flow:
     1. ConversationAgent: understand user intent
     2. GenericMCPAgent: execute the MCP tool
     3. ConversationAgent: respond to user with actual data
@@ -56,7 +54,3 @@ class GenericOrchestrator:
             "context": context,
             "execution_result": execution_result
         }
-
-
-# Alias for backwards compatibility
-Orchestrator = GenericOrchestrator

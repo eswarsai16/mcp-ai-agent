@@ -1,7 +1,4 @@
-"""
-Generic MCP agent - behaves exactly like Copilot + mcp.json.
-No school-specific logic. Works with any MCP server.
-"""
+
 import asyncio
 import json
 import os
@@ -17,15 +14,6 @@ from ..core.decision_parsing import DecisionParser
 
 
 class GenericMCPAgent:
-    """
-    Generic agent that mirrors Copilot + mcp.json behavior.
-    
-    1. Discover tools dynamically from MCP schema
-    2. Let LLM choose tool + args
-    3. Execute tool
-    4. Repair only on validation errors
-    5. Return result generically
-    """
     
     def __init__(self, mcp_url: str = "http://localhost:4000/mcp", model: str = None, ollama_url: str = "http://localhost:11434"):
         if model is None:

@@ -2,8 +2,8 @@
 Dynamically discover all available tools from MCP server.
 No hardcoded school logic - works with any MCP API.
 """
-import asyncio
-import json
+#import asyncio
+#import json
 from typing import Dict, List, Any
 from .mcp_client import MCPClient
 

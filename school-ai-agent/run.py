@@ -1,7 +1,7 @@
 import warnings
 import asyncio
 import json
-import sys
+import os
 from typing import Any
 
 # Suppress Pydantic V1 compatibility warning coming from langchain_core on Python 3.14+
@@ -12,18 +12,10 @@ warnings.filterwarnings(
     category=UserWarning,
 )
 
-# Try to import the generic builder flexibly (supports several build_graph layouts)
-try:
-    from graph.build_graph import build_generic_mcp_graph as _build_graph_fn
-except Exception:
-    try:
-        from graph.build_graph import build_graph as _build_graph_fn
-    except Exception:
-        try:
-            from graph.build_graph_generic import build_generic_mcp_graph as _build_graph_fn
-        except Exception:
-            _build_graph_fn = None
+# ✅ Only one build_graph.py exists, so import directly (no fallbacks)
+from graph.build_graph import build_generic_mcp_graph as _build_graph_fn
 
+# AgentState is optional (fallback to dict if not found)
 try:
     from graph.core.state import AgentState
 except Exception:
@@ -38,12 +30,14 @@ def _pretty_print(obj: Any) -> str:
 
 
 async def main():
-    if _build_graph_fn is None:
-        print("Error: could not find a graph builder (build_generic_mcp_graph or build_graph).")
-        return
-
-    # Build the graph once (use default MCP URL from config/build_graph)
-    graph = _build_graph_fn()
+    # Build the graph once
+    # If MCP_URL env var exists, pass it; otherwise let build_graph use its default
+    mcp_url = os.getenv("MCP_URL")
+    try:
+        graph = _build_graph_fn(mcp_url=mcp_url) if mcp_url else _build_graph_fn()
+    except TypeError:
+        # If builder does not support kwargs, fallback to positional/no-arg
+        graph = _build_graph_fn(mcp_url) if mcp_url else _build_graph_fn()
 
     # Continuous conversation loop
     print("=" * 60)
@@ -81,12 +75,8 @@ async def main():
             if hasattr(graph, "ainvoke"):
                 result = await graph.ainvoke(state)
             elif callable(graph):
-                # If graph is a coroutine function or callable wrapper
                 maybe = graph(state)
-                if asyncio.iscoroutine(maybe):
-                    result = await maybe
-                else:
-                    result = maybe
+                result = await maybe if asyncio.iscoroutine(maybe) else maybe
             else:
                 print("Error: graph object is not callable and has no 'ainvoke' method.")
                 break
@@ -96,8 +86,11 @@ async def main():
             if messages and len(messages) > 1:
                 # Get the last assistant message
                 for m in reversed(messages):
-                    if m.get("role") == "assistant":
+                    if isinstance(m, dict) and m.get("role") == "assistant":
                         content = m.get("content", "")
+                        # content might be dict/list sometimes; stringify safely
+                        if isinstance(content, (dict, list)):
+                            content = _pretty_print(content)
                         print(f"\nAssistant: {content}\n")
                         break
             else:
